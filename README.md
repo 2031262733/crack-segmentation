@@ -17,7 +17,29 @@ Measured on an RTX 5060 Laptop (8 GB), wall clock over 200 single-image forward 
 
 `per-image F1` averages the per-image F1 (small crack images weigh the same as large ones); the F1/IoU columns are micro-averaged over all pixels.
 
-Training curves: `python make_figs.py` reads `runs/*/history.csv` and writes `docs/curves.png` / `docs/curves.svg`. Qualitative check: `evaluate.py` writes four-panel overlays (input / ground truth / prediction / error map, green = TP, blue = missed, red = false positive) to `results/<model>/overlays/`.
+![qualitative](docs/figures/qualitative.png)
+
+*Three test images picked to cover thin, thick and faint cracks; the number in each panel is the per-image IoU. Green = TP, red = false positive, blue = missed. The two models are nearly tied on the easy thick crack (0.899 vs 0.901); the visible difference is how much of the faint, low-contrast branches each one keeps, and on the whole test split DeepCrack buys its +0.025 F1 mainly through recall (0.750 vs 0.697).*
+
+![threshold](docs/figures/f1_threshold.png)
+
+*Pixel-level F1 and IoU vs binarisation threshold (dotted lines = each model's best threshold: 0.35 for U-Net, 0.50 for DeepCrack). Both curves are flat between 0.2 and 0.8 (ΔF1 < 0.02), so the ranking does not depend on threshold tuning.*
+
+![training](docs/figures/training_curves.png)
+
+*Training loss (log scale), validation F1 and validation IoU per epoch. U-Net was trained 12 epochs, DeepCrack 10 (each started from a different budget; the comparison is not epoch-matched).*
+
+All three figures come from the same run as the table above: `python make_figs.py` regenerates them from `runs/*/history.csv`, `runs/*/best.pt` and `results/*/metrics.json`. Raw overlays (input / ground truth / prediction / error map, green = TP, blue = missed, red = false positive) are written by `evaluate.py` to `results/<model>/overlays/`.
+
+Numbers behind the figures are committed under [`results/`](results/结果汇总.md):
+
+| file | content |
+|---|---|
+| `results/结果汇总.md` | Chinese write-up: setup, main table, threshold table, takeaways |
+| `results/metrics_{unet,deepcrack}.json` | 17-point threshold sweep + params + FPS + per-image F1 |
+| `results/threshold_sweep.csv` | both models' sweeps flattened into one table (34 rows) |
+| `results/history_{unet,deepcrack}.csv` | per-epoch loss / val P / val R / val F1 / val IoU / lr / time |
+| `results/config_{unet,deepcrack}.json` | training hyper-parameters (seed 42, bs 4, lr 1e-4 …) |
 
 Both models are below the ~0.80 F1 reported in the DeepCrack paper: this reproduction uses 256² input instead of 448², 10–12 epochs instead of hundreds, and never tunes the threshold on the test split. The gap is a compute budget, not a training bug — the curves are still rising at the last epoch.
 
@@ -31,8 +53,10 @@ Both models are below the ~0.80 F1 reported in the DeepCrack paper: this reprodu
 | `losses.py` | BCE + Dice, deep-supervision weighting, confusion matrix → P/R/F1/IoU |
 | `train.py` | AdamW + cosine, grad clip, best-on-val-F1 checkpointing, `--amp/--freeze-bn/--side-weight` knobs |
 | `evaluate.py` | threshold sweep, per-image & micro metrics, params, FPS, error-map overlays |
-| `make_figs.py` | training curves from `history.csv` |
+| `make_figs.py` | result figures: qualitative comparison, threshold sweep, training curves |
 | `docs/原理与调试笔记.md` | Chinese notes: the theory, how to run, how to debug (symptom → cause → fix) |
+| `docs/figures/` | result figures used in this README (PNG, 300 dpi) |
+| `results/` | committed result snapshot: write-up, metrics JSON, threshold CSV, per-epoch history, configs |
 
 ## Quick start
 

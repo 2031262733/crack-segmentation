@@ -1,6 +1,7 @@
 env/
 data/
 runs/
-results/
+results/*/overlays/
+results/*/metrics.json
 __pycache__/
 *.pyc

@@ -1,0 +1,11 @@
+{
+  "model": "unet",
+  "data": "data/cfd",
+  "epochs": 12,
+  "size": 256,
+  "batch": 4,
+  "lr": 0.0001,
+  "workers": 0,
+  "out": "runs",
+  "seed": 42
+}
