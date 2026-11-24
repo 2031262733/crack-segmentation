@@ -16,7 +16,7 @@ from PIL import Image
 from torch.utils.data import DataLoader
 
 from dataset import CrackDataset
-from losses import confusion, scores
+from losses import scores
 from models import build_model
 
 
@@ -123,7 +123,9 @@ def main():
         "threshold_sweep": [{k: round(v, 4) for k, v in r.items()} for r in rows],
     }
     (out / "metrics.json").write_text(json.dumps(res, indent=2, ensure_ascii=False))
-    save_overlays(probs, gts, ds, out / "overlays")
+    save_overlays(probs, gts, ds, out / "overlays", thr=0.5)
+
+    print(json.dumps({k: v for k, v in res.items() if k != "threshold_sweep"}, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
